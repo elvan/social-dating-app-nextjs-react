@@ -1,3 +1,4 @@
+import { getUserInfoForNav } from '@/app/actions/userActions';
 import { auth } from '@/auth';
 import { Button, Navbar, NavbarBrand, NavbarContent } from '@nextui-org/react';
 import Link from 'next/link';
@@ -7,6 +8,7 @@ import UserMenu from './UserMenu';
 
 export default async function TopNav() {
   const session = await auth();
+  const userInfo = session?.user && (await getUserInfoForNav());
   return (
     <Navbar
       maxWidth='xl'
@@ -28,8 +30,8 @@ export default async function TopNav() {
         <NavLink href='/messages' label='Messages' />
       </NavbarContent>
       <NavbarContent justify='end'>
-        {session?.user ? (
-          <UserMenu user={session.user} />
+        {userInfo ? (
+          <UserMenu userInfo={userInfo} />
         ) : (
           <>
             <Button as={Link} href='/login' variant='bordered' className='text-white'>
