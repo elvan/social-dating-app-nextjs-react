@@ -1,28 +1,43 @@
-import { deleteMessage } from '@/app/actions/messageActions';
+import { deleteMessage, getMessagesByContainer } from '@/app/actions/messageActions';
 import { MessageDto } from '@/types';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Key, useCallback, useEffect, useState } from 'react';
+import { Key, useCallback, useEffect, useRef, useState } from 'react';
 import useMessageStore from './useMessageStore';
 
-export const useMessages = (initialMessages: MessageDto[]) => {
-  const { set, remove, messages, updateUnreadCount } = useMessageStore((state) => ({
+export const useMessages = (initialMessages: MessageDto[], nextCursor?: string) => {
+  const cursorRef = useRef(nextCursor);
+  const { set, remove, messages, updateUnreadCount, resetMessages } = useMessageStore((state) => ({
     set: state.set,
     remove: state.remove,
     messages: state.messages,
     updateUnreadCount: state.updateUnreadCount,
+    resetMessages: state.resetMessages,
   }));
   const searchParams = useSearchParams();
   const router = useRouter();
   const isOutbox = searchParams.get('container') === 'outbox';
+  const container = searchParams.get('container');
   const [isDeleting, setDeleting] = useState({ id: '', loading: false });
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     set(initialMessages);
+    cursorRef.current = nextCursor;
 
     return () => {
-      set([]);
+      resetMessages();
     };
-  }, [initialMessages, set]);
+  }, [initialMessages, resetMessages, set, nextCursor]);
+
+  const loadMore = useCallback(async () => {
+    if (cursorRef.current) {
+      setLoadingMore(true);
+      const { messages, nextCursor } = await getMessagesByContainer(container, cursorRef.current);
+      set(messages);
+      cursorRef.current = nextCursor;
+      setLoadingMore(false);
+    }
+  }, [container, set]);
 
   const columns = [
     { key: isOutbox ? 'recipientName' : 'senderName', label: isOutbox ? 'Recipient' : 'Sender' },
@@ -55,5 +70,8 @@ export const useMessages = (initialMessages: MessageDto[]) => {
     selectRow: handleRowSelect,
     isDeleting,
     messages,
+    loadMore,
+    loadingMore,
+    hasMore: !!cursorRef.current,
   };
 };
