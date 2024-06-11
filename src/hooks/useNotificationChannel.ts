@@ -28,9 +28,12 @@ export const useNotificationChannel = (userId: string | null, profileComplete: b
     [add, pathname, searchParams, updateUnreadCount]
   );
 
-  const handleNewLike = (data: { name: string; image: string | null; userId: string }) => {
-    newLikeToast(data.name, data.image, data.userId);
-  };
+  const handleNewLike = useCallback(
+    (data: { name: string; image: string | null; userId: string }) => {
+      newLikeToast(data.name, data.image, data.userId);
+    },
+    []
+  );
 
   useEffect(() => {
     if (!userId || !profileComplete) return;
@@ -49,5 +52,5 @@ export const useNotificationChannel = (userId: string | null, profileComplete: b
         channelRef.current = null;
       }
     };
-  }, [userId, handleNewMessage, profileComplete]);
+  }, [userId, handleNewMessage, profileComplete, handleNewLike]);
 };

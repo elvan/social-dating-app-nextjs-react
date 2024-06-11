@@ -1,12 +1,13 @@
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 export async function sendVerificationEmail(email: string, token: string) {
-  const link = `http://localhost:3000/verify-email?token=${token}`;
+  const link = `${baseUrl}/verify-email?token=${token}`;
 
   return resend.emails.send({
-    from: 'testing@resend.dev',
+    from: 'mail@nextmatch.trycatchlearn.com',
     to: email,
     subject: 'Verify your email address',
     html: `
@@ -18,10 +19,10 @@ export async function sendVerificationEmail(email: string, token: string) {
 }
 
 export async function sendPasswordResetEmail(email: string, token: string) {
-  const link = `http://localhost:3000/reset-password?token=${token}`;
+  const link = `${baseUrl}/reset-password?token=${token}`;
 
   return resend.emails.send({
-    from: 'testing@resend.dev',
+    from: 'mail@nextmatch.trycatchlearn.com',
     to: email,
     subject: 'Reset your password',
     html: `

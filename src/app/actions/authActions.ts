@@ -8,7 +8,6 @@ import {
   ProfileSchema,
   RegisterSchema,
   combinedRegisterSchema,
-  registerSchema,
 } from '@/lib/schemas/registerSchema';
 import { generateToken, getTokenByToken } from '@/lib/tokens';
 import { ActionResult } from '@/types';
