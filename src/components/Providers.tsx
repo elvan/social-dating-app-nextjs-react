@@ -12,9 +12,11 @@ import 'react-toastify/dist/ReactToastify.css';
 export default function Providers({
   children,
   userId,
+  profileComplete,
 }: {
   children: ReactNode;
   userId: string | null;
+  profileComplete: boolean;
 }) {
   const isUnreadCountSet = useRef(false);
   const { updateUnreadCount } = useMessageStore((state) => ({
@@ -37,8 +39,8 @@ export default function Providers({
     }
   }, [setUnreadCount, userId]);
 
-  usePresenceChannel();
-  useNotificationChannel(userId);
+  usePresenceChannel(userId, profileComplete);
+  useNotificationChannel(userId, profileComplete);
   return (
     <NextUIProvider>
       <ToastContainer position='bottom-right' hideProgressBar className='z-50' />

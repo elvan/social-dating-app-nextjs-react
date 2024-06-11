@@ -13,6 +13,7 @@ async function seedMembers() {
         name: member.name,
         passwordHash: await hash('password', 10),
         image: member.image,
+        profileComplete: true,
         member: {
           create: {
             dateOfBirth: new Date(member.dateOfBirth),
