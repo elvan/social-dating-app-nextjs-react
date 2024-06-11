@@ -8,6 +8,7 @@ import {
   ProfileSchema,
   RegisterSchema,
   combinedRegisterSchema,
+  registerSchema,
 } from '@/lib/schemas/registerSchema';
 import { generateToken, getTokenByToken } from '@/lib/tokens';
 import { ActionResult } from '@/types';
@@ -260,4 +261,14 @@ export async function completeSocialLoginProfile(
     console.log(error);
     throw error;
   }
+}
+
+export async function getUserRole() {
+  const session = await auth();
+
+  const role = session?.user.role;
+
+  if (!role) throw new Error('Not in role');
+
+  return role;
 }

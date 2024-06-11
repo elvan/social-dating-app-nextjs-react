@@ -4,6 +4,7 @@ import useMessageStore from '@/hooks/useMessageStore';
 import { pusherClient } from '@/lib/pusher';
 import { formatShortDateTime } from '@/lib/util';
 import { MessageDto } from '@/types';
+import { Channel } from 'pusher-js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import MessageBox from './MessageBox';
 
@@ -15,6 +16,7 @@ type Props = {
 
 export default function MessageList({ initialMessages, currentUserId, chatId }: Props) {
   const setReadCount = useRef(false);
+  const channelRef = useRef<Channel | null>(null);
   const [messages, setMessages] = useState(initialMessages.messages);
   const { updateUnreadCount } = useMessageStore((state) => ({
     updateUnreadCount: state.updateUnreadCount,
@@ -44,15 +46,19 @@ export default function MessageList({ initialMessages, currentUserId, chatId }: 
   }, []);
 
   useEffect(() => {
-    const channel = pusherClient.subscribe(chatId);
+    if (!channelRef.current) {
+      channelRef.current = pusherClient.subscribe(chatId);
 
-    channel.bind('message:new', handleNewMessage);
-    channel.bind('messages:read', handleReadMessages);
+      channelRef.current.bind('message:new', handleNewMessage);
+      channelRef.current.bind('messages:read', handleReadMessages);
+    }
 
     return () => {
-      channel.unsubscribe();
-      channel.unbind('message:new', handleNewMessage);
-      channel.unbind('messages:read', handleReadMessages);
+      if (channelRef.current && channelRef.current.subscribed) {
+        channelRef.current.unsubscribe();
+        channelRef.current.unbind('message:new', handleNewMessage);
+        channelRef.current.unbind('messages:read', handleReadMessages);
+      }
     };
   }, [chatId, handleNewMessage, handleReadMessages]);
 
